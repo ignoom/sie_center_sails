@@ -35,6 +35,12 @@ module.exports.routes = {
   '/': {
     view: 'homepage'
   },
+  /*
+  '/users':{
+    controller: 'user',
+    actions: 'index',
+  },
+  */
 
   /***************************************************************************
   *                                                                          *
@@ -45,6 +51,9 @@ module.exports.routes = {
   * for configuration options and examples.                                  *
   *                                                                          *
   ***************************************************************************/
+
+  //'get /users': 'UserController.index',
+  'post /post': 'PostController.create', // To create a new post entry
 
   'get /login': 'AuthController.login',
   'get /logout': 'AuthController.logout',
