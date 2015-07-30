@@ -6,63 +6,46 @@
  */
 
 module.exports = {
-	
+
 	create: function(req, res, next){
 		console.log('create action PostController');
-
 		var params = req.params.all();
 
-		var details = params.details;
-
-		//Create details
-
-
-		var sections = params.sections;
-
-		//Create sections
-		sections = JSON.parse(sections);
-		
-		for(i in sections){
-			console.log(sections[i]);
-			Section.create(sections[i], function(err, section){
-				if(err) return next(err);
-				console.log('Saving section');
-				console.log(section);
-			});
-		}
-		console.log('==========');
-		/*for (var i = sections.length - 1; i >= 0; i--) {
-			console.log(sections[i]);
-			Section.create(sections[i], function(err, section){
-				if(err) return next(err);
-				//Created
-				console.log('Section Created');
-				console.log(section);
-			});
-		};*/
-
+		params.owner = req.user;
 		console.log(params);
-
-		console.log('section');
-		console.log(sections);
-
-		console.log("************************************");
-		console.log('detail');
-		console.log(details);
-
 		console.log("************************************");
 
-		/*Post.create(params, function(err, post){
-			if(err) return next(err);
+		var sections = JSON.parse(params.sections);
 
-			res.status(201); //201 is created status code
-			res.json(post); // Return post
-		});
-		*/
-		res.status(201); //201 is created status code
-		res.json({
-			success: "Post created!"
-		});
+		var details = JSON.parse(params.details);
+		Post.create(params).then(function(post){
+			//Create mulitple sections
+			for(i in sections){
+				var section = sections[i];
+				section.post_id = post.id;
+				Section.create(section).then(function(section){
+					Post.find().populate('sections');
+					Section.find().populate('post_id');
+				});
+			}
+			//Create multiple details
+			for(i in details){
+				var detail = details[i];
+				detail.post_id = post.id;
+				Detail.create(detail).then( function(detail){
+					Post.find().populate('details');
+					Detail.find().populate('post_id');
+				});
+			}
+
+			return [post];
+		}).spread( function(post){
+			console.log(post);
+			res.status(201);
+			res.json(post); //return post
+		}).fail(function(error){
+				console.log(error);
+		}); // End of then promise of Post Creation
 	},
 
 	destroy: function(req, res){
@@ -85,5 +68,5 @@ module.exports = {
 			return res.json(posts);
 		});
 	},
-};
 
+};
