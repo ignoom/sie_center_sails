@@ -1,0 +1,6 @@
+--require should
+--reporter nyan
+--ui bdd
+--recursive
+--timeout 5000
+--full-trace
